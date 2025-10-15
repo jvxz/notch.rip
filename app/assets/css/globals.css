@@ -155,7 +155,6 @@
   }
   body {
     @apply bg-background text-foreground font-sans text-pretty min-h-screen underline-offset-2;
-    letter-spacing: 0.02em;
   }
 
   body[style*='padding-right'] {
