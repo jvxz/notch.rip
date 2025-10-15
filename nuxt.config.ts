@@ -65,6 +65,8 @@ export default defineNuxtConfig({
       contentSecurityPolicy: {
         'img-src': [
           'data:',
+          'https://avatars.githubusercontent.com',
+          'https://github.com',
         ],
       },
     },
