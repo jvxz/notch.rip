@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark-mode, .dark-mode *));
 
 @theme inline {
-  --font-sans: 'Pretendard', sans-serif;
+  --font-sans: 'Funnel Sans', sans-serif;
   --font-mono: 'Lilex', monospace;
   --animate-accordion-down: accordion-down 0.15s;
   --animate-accordion-up: accordion-up 0.15s;
@@ -81,6 +81,11 @@
 }
 
 :root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
   --overlay: hsl(0 0% 0% / 0.5);
   --radius: 0.4rem;
 
@@ -149,7 +154,7 @@
     @apply scrollbar-fancy;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased text-pretty min-h-screen underline-offset-2;
+    @apply bg-background text-foreground font-sans text-pretty min-h-screen underline-offset-2;
     letter-spacing: 0.02em;
   }
 
