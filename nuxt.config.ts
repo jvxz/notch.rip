@@ -67,6 +67,8 @@ export default defineNuxtConfig({
           'data:',
           'https://avatars.githubusercontent.com',
           'https://github.com',
+          'http://localhost:3000',
+          'http://notch.rip',
         ],
       },
     },
