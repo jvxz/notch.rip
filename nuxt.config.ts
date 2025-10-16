@@ -12,6 +12,10 @@ export default defineNuxtConfig({
     },
   },
 
+  colorMode: {
+    storage: 'cookie',
+  },
+
   compatibilityDate: '2025-07-15',
 
   css: ['~/assets/css/globals.css'],
