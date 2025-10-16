@@ -20,7 +20,7 @@ const interactiveStyles = {
 }
 
 const staticStyles = {
-  base: 'rounded p-5 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+  base: 'rounded p-4 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
   variant: {
     danger:
       'bg-card border-danger text-danger border [&>svg]:text-current',
