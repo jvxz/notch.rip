@@ -1,58 +1,77 @@
 <script lang="ts" setup>
-import type Konva from 'konva'
+import Konva from 'konva'
 import { useImage } from 'vue-konva'
 
 const { width: windowWidth } = useWindowSize()
-const ssrWidth = useSSRWidth()
 const stageRef = useTemplateRef<Konva.Stage>('stageRef')
 const imageRef = useTemplateRef<Konva.Image>('imageRef')
-const [image] = useImage('/assets/sample.jpg', 'Anonymous')
 const [cornerImage] = useImage('/assets/corner.svg', 'Anonymous')
 
 const getNotchHeight = (stageHeight: number) => stageHeight * 0.03
 const getMenubarHeight = (stageHeight: number) => stageHeight * 0.039
-const stageSize = computed(() => getStageSize(ssrWidth ?? windowWidth.value))
+const { canvasSize } = useCanvas()
 const cornerSize = 10
 
+const { imageBase64 } = useImageInput()
+const selectedImage = ref<HTMLImageElement | null>(null)
+
+watch(imageBase64, async () => {
+  if (imageBase64.value) {
+    await new Promise((resolve) => {
+      Konva.Image.fromURL(imageBase64.value, (image: Konva.Image) => {
+        selectedImage.value = image.image() as HTMLImageElement ?? null
+        resolve(true)
+      })
+    })
+    setInitialImageSettings()
+  }
+  else {
+    selectedImage.value = null
+  }
+})
+
+const { onCanvasDownloadTrigger } = useCanvas()
+onCanvasDownloadTrigger(saveImage)
+
 const stageConfig = computed<Konva.StageConfig>(() => ({
-  ...stageSize.value,
+  ...canvasSize.value,
 }))
 
 const notchRectConfig = computed<Konva.RectConfig>(() => ({
   cornerRadius: [0, 0, 9, 9],
   fill: 'black',
-  height: getNotchHeight(stageSize.value.height),
+  height: getNotchHeight(canvasSize.value.height),
   width: 125,
-  x: (stageSize.value.width) / 2 - 62.5,
+  x: (canvasSize.value.width) / 2 - 62.5,
 }))
 
 const menuBarConfig = computed<Konva.RectConfig>(() => ({
   fill: 'black',
-  height: getMenubarHeight(stageSize.value.height),
-  width: stageSize.value.width,
+  height: getMenubarHeight(canvasSize.value.height),
+  width: canvasSize.value.width,
 }))
 
 watch(windowWidth, () => {
   if (!stageRef.value)
     return
 
-  const { height, width } = stageSize.value
+  const { height, width } = canvasSize.value
 
   // @ts-expect-error incorrect types
   const stage: Konva.Stage = stageRef.value.getNode()
 
   stage.setSize({ height, width })
-  getInitialSize()
+  setInitialImageSettings()
 })
 
 const imageConfig = computed<Konva.ImageConfig>(() => ({
   dragBoundFunc,
   draggable: true,
-  image: image.value ?? undefined,
+  image: (selectedImage.value as CanvasImageSource) || undefined,
 }))
 
-function getInitialSize() {
-  if (!imageRef.value || !stageRef.value)
+function setInitialImageSettings() {
+  if (!imageRef.value || !stageRef.value || !selectedImage.value)
     return { height: 0, width: 0 }
 
   // @ts-expect-error incorrect types
@@ -61,20 +80,28 @@ function getInitialSize() {
   // @ts-expect-error incorrect types
   const image: Konva.Image = imageRef.value.getNode()
 
-  // const scale = stage.width() / image.width()
-  const imageAspect = image.width() / image.height()
-
   let targetHeight = 0
   let targetWidth = 0
 
-  if (image.width() <= image.height()) {
-    targetHeight = stage.height()
-  }
-  else {
+  const imageAspect = selectedImage.value.naturalWidth / selectedImage.value.naturalHeight
+  const isLandscape = selectedImage.value.naturalWidth > selectedImage.value.naturalHeight
+
+  if (isLandscape) {
     targetHeight = stage.height()
     targetWidth = targetHeight * imageAspect
   }
+  else {
+    targetWidth = stage.width()
+    targetHeight = targetWidth / imageAspect
+  }
 
+  if (targetWidth < stage.width()) {
+    targetWidth = stage.width()
+    targetHeight = targetWidth / imageAspect
+  }
+
+  image.position({ x: 0, y: 0 })
+  image.scale({ x: 1, y: 1 })
   image.setSize({ height: targetHeight, width: targetWidth })
 }
 
@@ -141,16 +168,8 @@ function handleWheel(e: any) {
   }
 
   const scaleBy = 1.05
-  let minScale = 0
 
-  if (image.getWidth() < image.getHeight()) {
-    minScale = stage.width() / image.getWidth()
-  }
-  else {
-    minScale = stage.height() / image.getHeight()
-  }
-
-  const newScale = Math.max(minScale, direction > 0 ? oldScale * scaleBy : oldScale / scaleBy)
+  const newScale = Math.max(1, direction > 0 ? oldScale * scaleBy : oldScale / scaleBy)
 
   image.scale({ x: newScale, y: newScale })
 
@@ -209,18 +228,6 @@ async function saveImage() {
   downloadFile(dataUrl, 'download.png')
 }
 
-function getStageSize(width: number) {
-  if (width > 1536) {
-    return { height: 1080 / 2, width: 1662.89 / 2 }
-  }
-
-  if (width < 1280) {
-    return { height: 1080 / 3, width: 1662.89 / 3 }
-  }
-
-  return { height: 1080 / 4, width: 1662.89 / 4 }
-}
-
 function handleMouseEnter() {
   document.body.style.cursor = 'move'
 }
@@ -230,7 +237,7 @@ function handleMouseLeave() {
 }
 
 onMounted(async () => {
-  await until(() => imageRef.value && stageRef.value).toBeTruthy()
+  await until(() => stageRef.value).toBeTruthy()
 
   // @ts-expect-error incorrect types
   const stage: Konva.Stage = stageRef.value.getNode()
@@ -245,19 +252,19 @@ onMounted(async () => {
     layer.batchDraw()
   })
 
-  getInitialSize()
+  setInitialImageSettings()
 })
 </script>
 
 <template>
-  <div class="relative overflow-hidden rounded-[18px] rounded-b-none">
+  <div class="relative z-10 overflow-hidden rounded-[18px] rounded-b-none bg-black shadow-lg">
     <v-stage
       ref="stageRef"
       :config="stageConfig"
     >
       <v-layer :config="{ imageSmoothingEnabled: true }">
         <v-image
-          v-if="image"
+          v-if="selectedImage"
           ref="imageRef"
           :config="imageConfig"
           @wheel="handleWheel"
@@ -277,7 +284,7 @@ onMounted(async () => {
             rotation: 90,
             width: cornerSize,
             x: cornerSize,
-            y: getMenubarHeight(stageSize.height) - 0.5,
+            y: getMenubarHeight(canvasSize.height) - 0.5,
           }"
         />
         <!-- top right -->
@@ -287,8 +294,8 @@ onMounted(async () => {
             image: cornerImage ?? undefined,
             rotation: 180,
             width: cornerSize,
-            x: stageSize.width,
-            y: getMenubarHeight(stageSize.height) + cornerSize - 0.5,
+            x: canvasSize.width,
+            y: getMenubarHeight(canvasSize.height) + cornerSize - 0.5,
           }"
         />
         <!-- bottom left -->
@@ -297,7 +304,7 @@ onMounted(async () => {
             height: cornerSize,
             image: cornerImage ?? undefined,
             width: cornerSize,
-            y: stageSize.height - cornerSize,
+            y: canvasSize.height - cornerSize,
           }"
         />
         <!-- bottom right -->
@@ -307,8 +314,8 @@ onMounted(async () => {
             height: cornerSize,
             image: cornerImage ?? undefined,
             width: cornerSize,
-            x: stageSize.width - cornerSize,
-            y: stageSize.height ?? 0 - cornerSize,
+            x: canvasSize.width - cornerSize,
+            y: canvasSize.height ?? 0 - cornerSize,
           }"
         />
       </v-layer>
