@@ -104,7 +104,7 @@
   --accent: hsl(246.8919 74% 60.7843%);
   --accent-foreground: hsl(0 0% 8%);
   --danger: hsl(352.6829 50.014% 50.0392%);
-  --danger-foreground: hsl(0 0% 8%);
+  --danger-foreground: hsl(0 0% 100%);
   --border: hsl(0 0% 81.9608%);
   --input: hsl(0 0% 80%);
   --ring: hsl(246.8919 74% 60.7843%);
