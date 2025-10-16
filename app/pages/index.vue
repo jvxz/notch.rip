@@ -1,24 +1,23 @@
 <template>
-  <div class="flex h-screen">
-    <div class="flex flex-1 flex-col gap-2 p-2">
-      <UCard>
+  <div class="flex h-screen p-2 gap-2">
+    <div class="flex flex-1 flex-col gap-2">
+      <UCard class="flex-row justify-between">
         <Logo />
+        <UButton
+          variant="ghost"
+          size="icon"
+          @click="toggleColorMode"
+        >
+          <Icon :name="$colorMode.preference === 'dark' ? 'tabler:sun' : 'tabler:moon'" />
+        </UButton>
       </UCard>
-      <UCard class="size-full">
-        Test
-      </UCard>
+      <LeftPanel />
     </div>
 
-    <div class="flex h-full w-[1450px] shrink-0 items-center justify-center">
-      <ClientOnly>
-        <Canvas />
-      </ClientOnly>
-    </div>
+    <CenterPanel />
 
-    <div class="flex-1 p-2">
-      <UCard class="size-full">
-        Test
-      </UCard>
+    <div class="flex-1">
+      <RightPanel />
     </div>
   </div>
 </template>
