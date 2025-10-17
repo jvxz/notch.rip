@@ -145,6 +145,10 @@
   box-shadow: 0 0 28px -3px oklch(from --value(--color-*) l c h / 0.3);
 }
 
+@utility text-trim {
+  text-box: trim-both cap alphabetic;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50 min-h-0 min-w-0;
