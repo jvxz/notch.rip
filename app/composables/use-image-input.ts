@@ -1,14 +1,44 @@
-const imageInputStore = createGlobalState(() => ({
-  image: ref<File | null>(null),
-}))
+const imageHook = createEventHook<File | string | null>()
 
-export function useImageInput() {
-  const { image } = imageInputStore()
+export const useImageInput = createSharedComposable(() => {
+  const imageUrl = ref<string | null>(null)
+  const imageFilename = ref<string | null>(null)
 
-  const { base64: imageBase64 } = useBase64(computed(() => image.value ? new Blob([image.value]) : undefined))
+  const { execute, isLoading } = useAsyncState(async (image: File | string | null) => {
+    if (image instanceof File) {
+      imageUrl.value = URL.createObjectURL(image)
+      imageFilename.value = image.name
+    }
+
+    if (typeof image === 'string') {
+      const res = await $fetch.raw<Blob>('/api/image', {
+        body: { url: image },
+        method: 'POST',
+        responseType: 'blob',
+      })
+
+      const { _data: blob } = res
+
+      if (!blob) {
+        return
+      }
+
+      imageUrl.value = URL.createObjectURL(blob)
+      imageFilename.value = image
+    }
+  }, null, { immediate: false })
+  imageHook.on(img => execute(0, img))
+
+  function clearImage() {
+    imageUrl.value = null
+    imageFilename.value = null
+  }
 
   return {
-    imageBase64,
-    imageFile: image,
+    clearImage,
+    imageFilename,
+    imageUrl,
+    isLoadingImage: isLoading,
+    setImage: imageHook.trigger,
   }
-}
+})

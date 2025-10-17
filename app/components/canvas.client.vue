@@ -12,13 +12,13 @@ const getMenubarHeight = (stageHeight: number) => stageHeight * 0.039
 const { canvasSize } = useCanvas()
 const cornerSize = 10
 
-const { imageBase64 } = useImageInput()
+const { imageUrl } = useImageInput()
 const selectedImage = ref<HTMLImageElement | null>(null)
 
-watch(imageBase64, async () => {
-  if (imageBase64.value) {
+watch(imageUrl, async () => {
+  if (imageUrl.value) {
     await new Promise((resolve) => {
-      Konva.Image.fromURL(imageBase64.value, (image: Konva.Image) => {
+      Konva.Image.fromURL(imageUrl.value!, (image: Konva.Image) => {
         selectedImage.value = image.image() as HTMLImageElement ?? null
         resolve(true)
       })

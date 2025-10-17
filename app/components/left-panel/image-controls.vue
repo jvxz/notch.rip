@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-const { imageFile } = useImageInput()
+const { clearImage, imageFilename, imageUrl, isLoadingImage, setImage } = useImageInput()
 const dropZoneRef = useTemplateRef<HTMLDivElement>('dropZoneRef')
+const imageUrlInput = ref('')
 
 const { onChange: onFileChange, open: openFileDialog } = useFileDialog({
   accept: 'image/png, image/jpeg',
@@ -9,7 +10,7 @@ const { onChange: onFileChange, open: openFileDialog } = useFileDialog({
 
 onFileChange((files) => {
   if (files && files[0]) {
-    imageFile.value = files[0]
+    setImage(files[0])
   }
 })
 
@@ -17,11 +18,22 @@ const { isOverDropZone } = useDropZone(dropZoneRef, {
   multiple: false,
   onDrop: (files) => {
     if (files && files[0]) {
-      imageFile.value = files[0]
+      setImage(files[0])
     }
   },
   preventDefaultForUnhandled: true,
 })
+
+async function handleImageUrl() {
+  if (!imageUrlInput.value)
+    return
+
+  if (!isUrl(imageUrlInput.value)) {
+    return
+  }
+
+  setImage(imageUrlInput.value)
+}
 </script>
 
 <template>
@@ -34,22 +46,29 @@ const { isOverDropZone } = useDropZone(dropZoneRef, {
     >
       <Icon name="tabler:photo" class="!size-8" />
       <p class="w-lg truncate">
-        {{ imageFile?.name ?? "Drag or click to import" }}
+        {{ imageFilename ?? "Drag or click to import" }}
       </p>
     </button>
     <div class="flex items-center gap-2">
       <UInput
+        v-model="imageUrlInput"
         type="url"
         placeholder="Enter image URL"
         class="font-normal"
+        @keydown.enter="handleImageUrl"
       />
-      <UButton variant="soft" size="icon">
+      <UButton
+        :is-loading="isLoadingImage"
+        variant="soft"
+        size="icon"
+        @click="handleImageUrl"
+      >
         <Icon name="tabler:arrow-right" class="!size-4" />
       </UButton>
       <UButton
-        :disabled="!imageFile"
+        :disabled="!imageUrl || isLoadingImage"
         variant="danger"
-        @click="imageFile = null"
+        @click="clearImage"
       >
         Clear image
       </UButton>
