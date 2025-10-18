@@ -2,7 +2,7 @@
   <div
     :class="cn(
       'absolute inset-0 bg-center',
-      '[background-size:50px_50px]',
+      '[background-size:8px_8px]',
       '[background-image:linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)]',
     )"
   />
