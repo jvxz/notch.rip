@@ -33,13 +33,13 @@ const popoverStyles = {
   content: [
     staticStyles.base,
     staticStyles.variant.default,
-    'duration-100 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-52 overflow-hidden p-1 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:scale-[97.5%]',
+    'duration-100 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 overflow-hidden p-1 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:scale-[97.5%]',
   ],
   item: [
     interactiveStyles.base,
     interactiveStyles.variant.ghost,
-    interactiveStyles.size.default,
-    'focus:bg-muted focus:text-accent-foreground [&_svg:not([class*=\'text-\'])]:text-muted-foreground [&_svg:not([class*=\'size-\'])]:size-12 data-[variant=danger]:text-danger-foreground data-[variant=danger]:focus:bg-danger/10 data-[variant=danger]:focus:text-danger-foreground data-[variant=danger]:*:[svg]:!text-danger-foreground dark:data-[variant=danger]:focus:bg-danger/40 relative flex cursor-default items-center p-1 px-2 text-sm outline-hidden transition-all select-none focus-visible:ring-0 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+    interactiveStyles.size.sm,
+    'focus:bg-muted focus:text-accent-foreground [&_svg:not([class*=\'text-\'])]:text-muted-foreground [&_svg:not([class*=\'size-\'])]:size-12 data-[variant=danger]:text-danger-foreground data-[variant=danger]:focus:bg-danger/10 data-[variant=danger]:focus:text-danger-foreground data-[variant=danger]:*:[svg]:!text-danger-foreground dark:data-[variant=danger]:focus:bg-danger/40 cursor-default items-center text-sm outline-hidden transition-all select-none focus-visible:ring-0 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0',
   ],
 }
 
