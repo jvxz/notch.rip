@@ -2,15 +2,19 @@
 import Konva from 'konva'
 import { useImage } from 'vue-konva'
 
+const { config } = useConfig()
 const { width: windowWidth } = useWindowSize()
 const stageRef = useTemplateRef<Konva.Stage>('stageRef')
 const imageRef = useTemplateRef<Konva.Image>('imageRef')
 const [cornerImage] = useImage('/assets/corner.svg', 'Anonymous')
 
+// @ts-expect-error incorrect types
+const stageNode = computed<Konva.Stage | undefined>(() => stageRef.value?.getNode())
+
 const getNotchHeight = (stageHeight: number) => stageHeight * 0.03
-const getMenubarHeight = (stageHeight: number) => stageHeight * 0.039
+const getMenubarHeight = (stageHeight: number) => stageHeight * config.menubarHeightScale.value
 const { canvasSize } = useCanvas()
-const cornerSize = 10
+const cornerSize = 11
 
 const { imageUrl } = useImageInput()
 const selectedImage = ref<HTMLImageElement | null>(null)
@@ -33,34 +37,28 @@ watch(imageUrl, async () => {
 const { onCanvasDownloadTrigger } = useCanvas()
 onCanvasDownloadTrigger(saveImage)
 
-const stageConfig = computed<Konva.StageConfig>(() => ({
-  ...canvasSize.value,
-}))
-
 const notchRectConfig = computed<Konva.RectConfig>(() => ({
   cornerRadius: [0, 0, 9, 9],
   fill: 'black',
   height: getNotchHeight(canvasSize.value.height),
+  visible: config.notch.value,
   width: 125,
   x: (canvasSize.value.width) / 2 - 62.5,
 }))
 
 const menuBarConfig = computed<Konva.RectConfig>(() => ({
   fill: 'black',
-  height: getMenubarHeight(canvasSize.value.height),
+  height: canvasSize.value.height * config.menubarHeightScale.value,
   width: canvasSize.value.width,
 }))
 
-watch(windowWidth, () => {
-  if (!stageRef.value)
+watch([windowWidth, config.resolution], () => {
+  if (!stageNode.value)
     return
 
   const { height, width } = canvasSize.value
 
-  // @ts-expect-error incorrect types
-  const stage: Konva.Stage = stageRef.value.getNode()
-
-  stage.setSize({ height, width })
+  stageNode.value.setSize({ height: height + getMenubarHeight(height), width })
   setInitialImageSettings()
 })
 
@@ -71,11 +69,8 @@ const imageConfig = computed<Konva.ImageConfig>(() => ({
 }))
 
 function setInitialImageSettings() {
-  if (!imageRef.value || !stageRef.value || !selectedImage.value)
+  if (!imageRef.value || !stageNode.value || !selectedImage.value)
     return { height: 0, width: 0 }
-
-  // @ts-expect-error incorrect types
-  const stage: Konva.Stage = stageRef.value.getNode()
 
   // @ts-expect-error incorrect types
   const image: Konva.Image = imageRef.value.getNode()
@@ -87,31 +82,28 @@ function setInitialImageSettings() {
   const isLandscape = selectedImage.value.naturalWidth > selectedImage.value.naturalHeight
 
   if (isLandscape) {
-    targetHeight = stage.height()
+    targetHeight = stageNode.value.height() - getMenubarHeight(stageNode.value.height())
     targetWidth = targetHeight * imageAspect
   }
   else {
-    targetWidth = stage.width()
-    targetHeight = targetWidth / imageAspect
+    targetWidth = stageNode.value.width()
+    targetHeight = targetWidth / imageAspect - getMenubarHeight(stageNode.value.height())
   }
 
-  if (targetWidth < stage.width()) {
-    targetWidth = stage.width()
-    targetHeight = targetWidth / imageAspect
+  if (targetWidth < stageNode.value.width()) {
+    targetWidth = stageNode.value.width()
+    targetHeight = targetWidth / imageAspect - getMenubarHeight(stageNode.value.height())
   }
 
-  image.position({ x: 0, y: 0 })
+  image.position({ x: 0, y: getMenubarHeight(stageNode.value.height()) })
   image.scale({ x: 1, y: 1 })
   image.setSize({ height: targetHeight, width: targetWidth })
 }
 
 // limit the image to the stage
 function dragBoundFunc(pos: Konva.Vector2d) {
-  if (!imageRef.value || !stageRef.value)
+  if (!imageRef.value || !stageNode.value)
     return pos
-
-  // @ts-expect-error incorrect types
-  const stage: Konva.Stage = stageRef.value.getNode()
 
   // @ts-expect-error incorrect types
   const image: Konva.Image = imageRef.value.getNode()
@@ -119,18 +111,18 @@ function dragBoundFunc(pos: Konva.Vector2d) {
   let x = 0
   let y = 0
 
-  if (stage.width() <= image.getWidth() * image.scaleX()) {
-    x = Math.max(pos.x > 0 ? 0 : pos.x, stage.width() - image.getWidth() * image.scaleX())
+  if (stageNode.value.width() <= image.getWidth() * image.scaleX()) {
+    x = Math.max(pos.x > 0 ? 0 : pos.x, stageNode.value.width() - image.getWidth() * image.scaleX())
   }
   else {
-    x = Math.min(pos.x < 0 ? 0 : pos.x, stage.width() - image.getWidth() * image.scaleX())
+    x = Math.min(pos.x < 0 ? 0 : pos.x, stageNode.value.width() - image.getWidth() * image.scaleX())
   }
 
-  if (stage.height() <= image.getHeight() * image.scaleY()) {
-    y = Math.max(pos.y > 0 ? 0 : pos.y, stage.height() - image.getHeight() * image.scaleY())
+  if (stageNode.value.height() <= image.getHeight() * image.scaleY()) {
+    y = Math.max(pos.y > getMenubarHeight(stageNode.value.height()) ? getMenubarHeight(stageNode.value.height()) : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
   }
   else {
-    y = Math.min(pos.y < 0 ? 0 : pos.y, stage.height() - image.getHeight() * image.scaleY())
+    y = Math.min(pos.y < getMenubarHeight(stageNode.value.height()) ? getMenubarHeight(stageNode.value.height()) : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
   }
 
   return { x, y }
@@ -139,17 +131,14 @@ function dragBoundFunc(pos: Konva.Vector2d) {
 function handleWheel(e: any) {
   e.evt.preventDefault()
 
-  if (!imageRef.value || !stageRef.value)
+  if (!imageRef.value || !stageNode.value)
     return
 
   // @ts-expect-error incorrect types
   const image: Konva.Image = imageRef.value.getNode()
 
-  // @ts-expect-error incorrect types
-  const stage: Konva.Stage = stageRef.value.getNode()
-
   const oldScale = image.scaleX()
-  const pointer = stage.getRelativePointerPosition()
+  const pointer = stageNode.value.getRelativePointerPosition()
 
   if (!pointer)
     return
@@ -190,7 +179,7 @@ async function saveImage() {
   if (!stage || !source)
     return
 
-  const targetAspect = 3024 / 1964
+  const targetAspect = config.resolution.value
 
   const nativeWidth = source.naturalWidth
   const nativeHeight = source.naturalHeight
@@ -222,10 +211,12 @@ async function saveImage() {
   const pixelRatio = exportWidth / cropWidth
 
   const dataUrl = stage.toDataURL({
+    height: cropHeight,
     pixelRatio,
     quality: 1,
+    width: cropWidth,
   })
-  downloadFile(dataUrl, 'download.png')
+  downloadFile(dataUrl, `notch-rip-${Date.now()}.png`)
 }
 
 function handleMouseEnter() {
@@ -237,11 +228,9 @@ function handleMouseLeave() {
 }
 
 onMounted(async () => {
-  await until(() => stageRef.value).toBeTruthy()
+  await until(() => stageNode.value).toBeTruthy()
 
-  // @ts-expect-error incorrect types
-  const stage: Konva.Stage = stageRef.value.getNode()
-  const layer = stage.getLayers()
+  const layer = stageNode.value!.getLayers()
 
   layer.forEach((layer) => {
     const ctx = layer.getContext()._context
@@ -257,10 +246,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="relative z-10 overflow-hidden rounded-[18px] rounded-b-none bg-black shadow-lg">
+  <div class="relative z-10 overflow-hidden rounded-b-none bg-black shadow-lg">
     <v-stage
       ref="stageRef"
-      :config="stageConfig"
+      :config="{
+        ...canvasSize,
+      }"
     >
       <v-layer :config="{ imageSmoothingEnabled: true }">
         <v-image
@@ -279,43 +270,47 @@ onMounted(async () => {
         <!-- top left -->
         <v-image
           :config="{
+            visible: config.corners.value.tl,
             height: cornerSize,
             image: cornerImage ?? undefined,
             rotation: 90,
             width: cornerSize,
             x: cornerSize,
-            y: getMenubarHeight(canvasSize.height) - 0.5,
+            y: stageNode?.height() ? stageNode.height() * config.menubarHeightScale.value - 0.75 : 0,
           }"
         />
         <!-- top right -->
         <v-image
           :config="{
+            visible: config.corners.value.tr,
             height: cornerSize,
             image: cornerImage ?? undefined,
             rotation: 180,
             width: cornerSize,
-            x: canvasSize.width,
-            y: getMenubarHeight(canvasSize.height) + cornerSize - 0.5,
+            x: stageNode?.width() ? stageNode.width() : 0,
+            y: stageNode?.height() ? stageNode.height() * config.menubarHeightScale.value + cornerSize - 0.75 : 0,
           }"
         />
         <!-- bottom left -->
         <v-image
           :config="{
+            visible: config.corners.value.bl,
             height: cornerSize,
             image: cornerImage ?? undefined,
             width: cornerSize,
-            y: canvasSize.height - cornerSize,
+            y: stageNode?.height() ? stageNode.height() - cornerSize : 0,
           }"
         />
         <!-- bottom right -->
         <v-image
           :config="{
+            visible: config.corners.value.br,
             rotation: 270,
             height: cornerSize,
             image: cornerImage ?? undefined,
             width: cornerSize,
-            x: canvasSize.width - cornerSize,
-            y: canvasSize.height ?? 0 - cornerSize,
+            x: stageNode?.width() ? stageNode.width() - cornerSize : 0,
+            y: stageNode?.height() ? stageNode.height() : 0,
           }"
         />
       </v-layer>
