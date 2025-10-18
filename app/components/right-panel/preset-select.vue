@@ -3,7 +3,7 @@ const { applyPreset, currentPreset } = useConfig()
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col gap-2">
+  <div class="flex flex-col gap-2">
     <p>Presets</p>
     <USelectRoot @update:model-value="(value) => applyPreset(value as PresetKey)">
       <USelectTrigger class="w-full text-muted-foreground">
