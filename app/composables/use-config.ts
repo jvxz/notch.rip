@@ -46,14 +46,27 @@ export const useConfigValues = createGlobalState(() => {
 
 export const useConfig = createSharedComposable(() => {
   const config = useConfigValues()
-
   const currentPreset = ref<PresetKey | 'Custom'>('MacBook')
 
-  function applyPreset(preset: PresetKey) {
-    currentPreset.value = preset
-    for (const key in PRESETS[preset]) {
-      config[key as keyof typeof config].value = PRESETS[preset][key as keyof typeof PRESETS[typeof preset]]
+  let isApplyingPreset = false
+
+  watch(reactive(config), () => {
+    if (!isApplyingPreset && currentPreset.value !== 'Custom') {
+      currentPreset.value = 'Custom'
     }
+  }, { deep: true })
+
+  async function applyPreset(preset: PresetKey) {
+    isApplyingPreset = true
+    for (const key in PRESETS[preset]) {
+      config[key as keyof typeof config].value = Object.assign(
+        config[key as keyof typeof config].value,
+        PRESETS[preset][key as keyof typeof PRESETS[typeof preset]],
+      )
+    }
+    currentPreset.value = preset
+    await nextTick()
+    isApplyingPreset = false
   }
 
   return {
