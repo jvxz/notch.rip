@@ -8,6 +8,7 @@ const { triggerCanvasDownload } = useCanvas()
       Bar & corners
     </h1>
     <RightPanelPresetSelect />
+    <RightPanelAspectControls />
     <RightPanelCornerControls />
     <div class="flex-1" />
     <UButton @click="triggerCanvasDownload">
