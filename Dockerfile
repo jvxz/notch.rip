@@ -1,20 +1,18 @@
-FROM node:22-alpine AS build
+FROM oven/bun:1 AS build
 
 WORKDIR /app
 
-RUN corepack enable
+COPY package.json bun.lock ./
 
-COPY package.json pnpm-lock.yaml ./
-
-RUN pnpm i
+RUN bun install --frozen-lockfile
 
 COPY . ./
 
 # ARG EXAMPLE_VARIABLE
 
-RUN pnpm run build
+RUN bun run build
 
-FROM node:22-alpine
+FROM oven/bun:1
 
 WORKDIR /app
 
@@ -22,4 +20,4 @@ COPY --from=build /app/.output/ ./
 
 ENV NODE_ENV=production
 
-CMD ["node", "/app/server/index.mjs"]
+CMD ["bun", "run", "/app/server/index.mjs"]
