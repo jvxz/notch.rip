@@ -2,7 +2,7 @@
 import Konva from 'konva'
 import { useImage } from 'vue-konva'
 
-const { config } = useConfig()
+const { canvasAspect, config } = useConfig()
 const { width: windowWidth } = useWindowSize()
 const stageRef = useTemplateRef<Konva.Stage>('stageRef')
 const imageRef = useTemplateRef<Konva.Image>('imageRef')
@@ -41,7 +41,7 @@ const notchRectConfig = computed<Konva.RectConfig>(() => ({
   cornerRadius: [0, 0, 9, 9],
   fill: 'black',
   height: getNotchHeight(canvasSize.value.height),
-  visible: config.notch.value,
+  visible: Boolean(config.notch.value),
   width: 125,
   x: (canvasSize.value.width) / 2 - 62.5,
 }))
@@ -52,13 +52,14 @@ const menuBarConfig = computed<Konva.RectConfig>(() => ({
   width: canvasSize.value.width,
 }))
 
-watch([windowWidth, config.resolution], () => {
+watch([windowWidth, canvasAspect], () => {
   if (!stageNode.value)
     return
 
-  const { height, width } = canvasSize.value
 
+  const { height, width } = canvasSize.value
   stageNode.value.setSize({ height: height + getMenubarHeight(height), width })
+
   setInitialImageSettings()
 })
 
@@ -171,15 +172,12 @@ function handleWheel(e: any) {
 
 async function saveImage() {
   // @ts-expect-error incorrect types
-  const stage: Konva.Stage = stageRef.value?.getNode()
-
-  // @ts-expect-error incorrect types
   const konvaImage: Konva.Image = imageRef.value?.getNode()
   const source = konvaImage.image() as HTMLImageElement | undefined
-  if (!stage || !source)
+  if (!stageNode.value || !source)
     return
 
-  const targetAspect = config.resolution.value
+  const targetAspect = canvasAspect.value
 
   const nativeWidth = source.naturalWidth
   const nativeHeight = source.naturalHeight
@@ -187,12 +185,12 @@ async function saveImage() {
   let cropWidth = 0
   let cropHeight = 0
 
-  if (cropHeight > stage.height()) {
-    cropHeight = stage.height()
+  if (cropHeight > stageNode.value.height()) {
+    cropHeight = stageNode.value.height()
     cropWidth = cropHeight * targetAspect
   }
   else {
-    cropWidth = stage.width()
+    cropWidth = stageNode.value.width()
     cropHeight = cropWidth / targetAspect
   }
 
@@ -210,7 +208,7 @@ async function saveImage() {
 
   const pixelRatio = exportWidth / cropWidth
 
-  const dataUrl = stage.toDataURL({
+  const dataUrl = stageNode.value.toDataURL({
     height: cropHeight,
     pixelRatio,
     quality: 1,
@@ -249,9 +247,7 @@ onMounted(async () => {
   <div class="relative z-10 overflow-hidden rounded-b-none bg-black shadow-lg">
     <v-stage
       ref="stageRef"
-      :config="{
-        ...canvasSize,
-      }"
+      :config="canvasSize"
     >
       <v-layer :config="{ imageSmoothingEnabled: true }">
         <v-image
@@ -270,7 +266,7 @@ onMounted(async () => {
         <!-- top left -->
         <v-image
           :config="{
-            visible: config.corners.value.tl,
+            visible: Boolean(config.corners.value.tl),
             height: cornerSize,
             image: cornerImage ?? undefined,
             rotation: 90,
@@ -282,7 +278,7 @@ onMounted(async () => {
         <!-- top right -->
         <v-image
           :config="{
-            visible: config.corners.value.tr,
+            visible: Boolean(config.corners.value.tr),
             height: cornerSize,
             image: cornerImage ?? undefined,
             rotation: 180,
@@ -294,7 +290,7 @@ onMounted(async () => {
         <!-- bottom left -->
         <v-image
           :config="{
-            visible: config.corners.value.bl,
+            visible: Boolean(config.corners.value.bl),
             height: cornerSize,
             image: cornerImage ?? undefined,
             width: cornerSize,
@@ -304,7 +300,7 @@ onMounted(async () => {
         <!-- bottom right -->
         <v-image
           :config="{
-            visible: config.corners.value.br,
+            visible: Boolean(config.corners.value.br),
             rotation: 270,
             height: cornerSize,
             image: cornerImage ?? undefined,

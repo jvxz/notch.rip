@@ -1,7 +1,25 @@
-export type PresetKey = keyof typeof PRESETS
+export interface Config {
+  aspect: {
+    height: number
+    width: number
+  }
+  corners: {
+    bl: boolean
+    br: boolean
+    tl: boolean
+    tr: boolean
+  }
+  menubarHeightScale: number
+  notch: boolean
+}
+export type PresetKey = typeof PRESET_KEYS[number]
 export const PRESET_KEYS = ['MacBook', 'Desktop'] as const
-export const PRESETS = {
+export const PRESETS: Record<PresetKey, Config> = {
   Desktop: {
+    aspect: {
+      height: 9,
+      width: 16,
+    },
     corners: {
       bl: true,
       br: true,
@@ -10,9 +28,12 @@ export const PRESETS = {
     },
     menubarHeightScale: 0.019,
     notch: false,
-    resolution: 16 / 9,
   },
   MacBook: {
+    aspect: {
+      height: 1964,
+      width: 3024,
+    },
     corners: {
       bl: true,
       br: true,
@@ -21,26 +42,20 @@ export const PRESETS = {
     },
     menubarHeightScale: 0.039,
     notch: true,
-    resolution: 3024 / 1964,
   },
 } as const
 
 export const useConfigValues = createGlobalState(() => {
-  const corners = ref({
-    bl: true,
-    br: true,
-    tl: true,
-    tr: true,
-  })
-  const menubarHeightScale = ref(0.039)
-  const notch = ref(true)
-  const resolution = ref(3024 / 1964)
+  const corners = ref({ ...PRESETS.MacBook.corners })
+  const menubarHeightScale = ref(PRESETS.MacBook.menubarHeightScale)
+  const notch = ref(PRESETS.MacBook.notch)
+  const aspect = ref({ ...PRESETS.MacBook.aspect })
 
   return {
+    aspect,
     corners,
     menubarHeightScale,
     notch,
-    resolution,
   }
 })
 
@@ -58,19 +73,22 @@ export const useConfig = createSharedComposable(() => {
 
   async function applyPreset(preset: PresetKey) {
     isApplyingPreset = true
-    for (const key in PRESETS[preset]) {
-      config[key as keyof typeof config].value = Object.assign(
-        config[key as keyof typeof config].value,
-        PRESETS[preset][key as keyof typeof PRESETS[typeof preset]],
-      )
-    }
+
+    config.aspect.value = { ...PRESETS[preset].aspect }
+    config.corners.value = { ...PRESETS[preset].corners }
+    config.menubarHeightScale.value = PRESETS[preset].menubarHeightScale
+    config.notch.value = PRESETS[preset].notch
+
     currentPreset.value = preset
     await nextTick()
     isApplyingPreset = false
   }
 
+  const canvasAspect = computed(() => config.aspect.value.width / config.aspect.value.height)
+
   return {
     applyPreset,
+    canvasAspect,
     config,
     currentPreset,
   }
