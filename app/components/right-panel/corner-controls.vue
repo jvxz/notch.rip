@@ -22,7 +22,9 @@ function toggleAllCorners() {
 <template>
   <div class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
-      <p>Corners</p>
+      <p class="text-lg">
+        Corners
+      </p>
       <UButton
         size="sm"
         variant="outline"

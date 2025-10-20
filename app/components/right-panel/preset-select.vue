@@ -4,7 +4,7 @@ const { applyPreset, currentPreset } = useConfig()
 
 <template>
   <div class="flex flex-col gap-2">
-    <p>Presets</p>
+    <p class="text-lg">Presets</p>
     <USelectRoot :model-value="currentPreset" @update:model-value="(value) => applyPreset(value as PresetKey)">
       <USelectTrigger class="w-full text-muted-foreground">
         {{ currentPreset }}

@@ -10,7 +10,9 @@ function getScreenAspect() {
 <template>
   <div class="flex flex-col gap-2">
     <div class="flex items-center justify-between gap-2">
-      <p>Aspect ratio</p>
+      <p class="text-lg">
+        Aspect ratio
+      </p>
       <UButton
         size="sm"
         variant="soft"
