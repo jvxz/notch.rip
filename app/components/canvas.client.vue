@@ -10,7 +10,7 @@ const imageRef = useTemplateRef<Konva.Image>('imageRef')
 const stageNode = computed<Konva.Stage | undefined>(() => stageRef.value?.getNode())
 
 const getNotchHeight = (stageHeight: number) => stageHeight * 0.03
-const getMenubarHeight = (stageHeight: number) => stageHeight * config.menubarHeightScale.value
+const menubarHeight = computed(() => (stageNode.value?.height() ?? 0) * config.menubarHeightScale.value)
 const { canvasSize } = useCanvas()
 
 const cornerRef = useTemplateRef<Konva.Image>('cornerRef')
@@ -49,11 +49,11 @@ const notchRectConfig = computed<Konva.RectConfig>(() => ({
 const menuBarConfig = computed<Konva.RectConfig>(() => ({
   fill: config.menubarColor.value,
   // +1 to fix miniscule gap between menubar + image + corners
-  height: getMenubarHeight(canvasSize.value.height) + 1,
+  height: menubarHeight.value + 1,
   width: canvasSize.value.width,
 }))
 
-watch([windowWidth, canvasAspect, canvasSize], () => {
+watch([windowWidth, canvasAspect, canvasSize, menubarHeight], () => {
   if (!stageNode.value)
     return
 
@@ -81,7 +81,7 @@ function setInitialSettings() {
   const imageAspect = selectedImage.value.naturalWidth / selectedImage.value.naturalHeight
   const isLandscape = selectedImage.value.naturalWidth > selectedImage.value.naturalHeight
 
-  const usableHeight = stageNode.value.height() - getMenubarHeight(stageNode.value.height())
+  const usableHeight = stageNode.value.height() - menubarHeight.value
 
   if (isLandscape) {
     targetHeight = usableHeight
@@ -102,7 +102,7 @@ function setInitialSettings() {
     targetHeight = targetWidth / imageAspect
   }
 
-  image.position({ x: 0, y: getMenubarHeight(stageNode.value.height()) })
+  image.position({ x: 0, y: menubarHeight.value })
   image.scale({ x: 1, y: 1 })
   image.setSize({ height: targetHeight, width: targetWidth })
 }
@@ -130,13 +130,13 @@ function dragBoundFunc(pos: Konva.Vector2d) {
   }
 
   if (stageNode.value.height() <= image.getHeight() * image.scaleY()) {
-    y = Math.max(pos.y > getMenubarHeight(stageNode.value.height())
-      ? getMenubarHeight(stageNode.value.height())
+    y = Math.max(pos.y > menubarHeight.value
+      ? menubarHeight.value
       : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
   }
   else {
-    y = Math.min(pos.y < getMenubarHeight(stageNode.value.height())
-      ? getMenubarHeight(stageNode.value.height())
+    y = Math.min(pos.y < menubarHeight.value
+      ? menubarHeight.value
       : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
   }
 

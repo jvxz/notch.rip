@@ -27,7 +27,7 @@ function toggleAllCorners() {
       </p>
       <UButton
         size="sm"
-        variant="outline"
+        variant="soft"
         @click="toggleAllCorners"
       >
         Toggle
