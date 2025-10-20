@@ -10,7 +10,7 @@ const { triggerCanvasDownload } = useCanvas()
     <RightPanelPresetSelect />
     <RightPanelAspectControls />
     <RightPanelCornerControls />
-    <RightPanelColorControls/>
+    <RightPanelColorControls />
     <div class="flex-1" />
     <UButton @click="triggerCanvasDownload">
       Download

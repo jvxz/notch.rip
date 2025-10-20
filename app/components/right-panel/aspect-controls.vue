@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const { config } = useConfig()
+const config = useConfigValues()
 </script>
 
 <template>

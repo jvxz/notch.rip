@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const { config } = useConfig()
+const config = useConfigValues()
 
 function toggleCorner(corner: 'tl' | 'tr' | 'bl' | 'br') {
   config.corners.value[corner] = !config.corners.value[corner]
@@ -28,10 +28,10 @@ function toggleAllCorners() {
         variant="outline"
         @click="toggleAllCorners"
       >
-      Toggle
+        Toggle
       </UButton>
     </div>
-    <div class="relative mx-auto h-32 w-full max-w-56 overflow-hidden rounded border grid place-items-center">
+    <div class="relative mx-auto grid h-32 w-full max-w-56 place-items-center overflow-hidden rounded border">
       <Icon name="tabler:photo" class="!size-7 text-border" />
       <button
         :data-active="config.corners.value.tl"

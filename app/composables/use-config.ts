@@ -45,14 +45,28 @@ export const PRESETS: Record<PresetKey, Config> = {
   },
 } as const
 
-export const useConfigValues = createGlobalState(() => {
-  const corners = ref({ ...PRESETS.MacBook.corners })
-  const menubarHeightScale = ref(PRESETS.MacBook.menubarHeightScale)
-  const notch = ref(PRESETS.MacBook.notch)
-  const aspect = ref({ ...PRESETS.MacBook.aspect })
-  const cornersColor = ref('#000000')
-  const menubarColor = ref('#000000')
-  const syncColors = ref(true)
+export function useConfigValues() {
+  const corners = useCookie('config:corners', {
+    default: () => ({ ...PRESETS.MacBook.corners }),
+  })
+  const menubarHeightScale = useCookie('config:menubar-height-scale', {
+    default: () => PRESETS.MacBook.menubarHeightScale,
+  })
+  const notch = useCookie('config:notch', {
+    default: () => PRESETS.MacBook.notch,
+  })
+  const aspect = useCookie('config:aspect', {
+    default: () => ({ ...PRESETS.MacBook.aspect }),
+  })
+  const cornersColor = useCookie('config:corners-color', {
+    default: () => '#000000',
+  })
+  const menubarColor = useCookie('config:menubar-color', {
+    default: () => '#000000',
+  })
+  const syncColors = useCookie('config:sync-colors', {
+    default: () => true,
+  })
 
   return {
     aspect,
@@ -63,31 +77,24 @@ export const useConfigValues = createGlobalState(() => {
     notch,
     syncColors,
   }
-})
+}
 
 export const useConfig = createSharedComposable(() => {
   const config = useConfigValues()
   const currentPreset = ref<PresetKey | 'Custom'>('MacBook')
 
-  let isApplyingPreset = false
-
-  watch(reactive(config), () => {
-    if (!isApplyingPreset && currentPreset.value !== 'Custom') {
-      currentPreset.value = 'Custom'
-    }
-  }, { deep: true })
-
   async function applyPreset(preset: PresetKey) {
-    isApplyingPreset = true
-
-    config.aspect.value = { ...PRESETS[preset].aspect }
-    config.corners.value = { ...PRESETS[preset].corners }
+    config.aspect.value.height = PRESETS[preset].aspect.height
+    config.aspect.value.width = PRESETS[preset].aspect.width
+    config.corners.value.bl = PRESETS[preset].corners.bl
+    config.corners.value.br = PRESETS[preset].corners.br
+    config.corners.value.tl = PRESETS[preset].corners.tl
+    config.corners.value.tr = PRESETS[preset].corners.tr
     config.menubarHeightScale.value = PRESETS[preset].menubarHeightScale
     config.notch.value = PRESETS[preset].notch
 
     currentPreset.value = preset
     await nextTick()
-    isApplyingPreset = false
   }
 
   const canvasAspect = computed(() => config.aspect.value.width / config.aspect.value.height)
