@@ -26,7 +26,7 @@ export const PRESETS: Record<PresetKey, Config> = {
       tl: true,
       tr: true,
     },
-    menubarHeightScale: 0.019,
+    menubarHeightScale: 0.0165,
     notch: false,
   },
   MacBook: {
@@ -50,12 +50,18 @@ export const useConfigValues = createGlobalState(() => {
   const menubarHeightScale = ref(PRESETS.MacBook.menubarHeightScale)
   const notch = ref(PRESETS.MacBook.notch)
   const aspect = ref({ ...PRESETS.MacBook.aspect })
+  const cornersColor = ref('#000000')
+  const menubarColor = ref('#000000')
+  const syncColors = ref(true)
 
   return {
     aspect,
     corners,
+    cornersColor,
+    menubarColor,
     menubarHeightScale,
     notch,
+    syncColors,
   }
 })
 

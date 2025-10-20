@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import Konva from 'konva'
-import { useImage } from 'vue-konva'
 
 const { canvasAspect, config } = useConfig()
 const { width: windowWidth } = useWindowSize()
 const stageRef = useTemplateRef<Konva.Stage>('stageRef')
 const imageRef = useTemplateRef<Konva.Image>('imageRef')
-const [cornerImage] = useImage('/assets/corner.svg', 'Anonymous')
 
 // @ts-expect-error incorrect types
 const stageNode = computed<Konva.Stage | undefined>(() => stageRef.value?.getNode())
@@ -14,6 +12,8 @@ const stageNode = computed<Konva.Stage | undefined>(() => stageRef.value?.getNod
 const getNotchHeight = (stageHeight: number) => stageHeight * 0.03
 const getMenubarHeight = (stageHeight: number) => stageHeight * config.menubarHeightScale.value
 const { canvasSize } = useCanvas()
+
+const cornerRef = useTemplateRef<Konva.Image>('cornerRef')
 const cornerSize = 11
 
 const { imageUrl } = useImageInput()
@@ -27,7 +27,7 @@ watch(imageUrl, async () => {
         resolve(true)
       })
     })
-    setInitialImageSettings()
+    setInitialSettings()
   }
   else {
     selectedImage.value = null
@@ -47,20 +47,17 @@ const notchRectConfig = computed<Konva.RectConfig>(() => ({
 }))
 
 const menuBarConfig = computed<Konva.RectConfig>(() => ({
-  fill: 'black',
-  height: canvasSize.value.height * config.menubarHeightScale.value,
+  fill: config.menubarColor.value,
+  // +1 to fix miniscule gap between menubar + image + corners
+  height: getMenubarHeight(canvasSize.value.height) + 1,
   width: canvasSize.value.width,
 }))
 
-watch([windowWidth, canvasAspect], () => {
+watch([windowWidth, canvasAspect, canvasSize], () => {
   if (!stageNode.value)
     return
 
-
-  const { height, width } = canvasSize.value
-  stageNode.value.setSize({ height: height + getMenubarHeight(height), width })
-
-  setInitialImageSettings()
+  setInitialSettings()
 })
 
 const imageConfig = computed<Konva.ImageConfig>(() => ({
@@ -69,9 +66,11 @@ const imageConfig = computed<Konva.ImageConfig>(() => ({
   image: (selectedImage.value as CanvasImageSource) || undefined,
 }))
 
-function setInitialImageSettings() {
+function setInitialSettings() {
   if (!imageRef.value || !stageNode.value || !selectedImage.value)
     return { height: 0, width: 0 }
+
+  stageNode.value.setSize(canvasSize.value)
 
   // @ts-expect-error incorrect types
   const image: Konva.Image = imageRef.value.getNode()
@@ -82,18 +81,25 @@ function setInitialImageSettings() {
   const imageAspect = selectedImage.value.naturalWidth / selectedImage.value.naturalHeight
   const isLandscape = selectedImage.value.naturalWidth > selectedImage.value.naturalHeight
 
+  const usableHeight = stageNode.value.height() - getMenubarHeight(stageNode.value.height())
+
   if (isLandscape) {
-    targetHeight = stageNode.value.height() - getMenubarHeight(stageNode.value.height())
+    targetHeight = usableHeight
     targetWidth = targetHeight * imageAspect
   }
   else {
     targetWidth = stageNode.value.width()
-    targetHeight = targetWidth / imageAspect - getMenubarHeight(stageNode.value.height())
+    targetHeight = targetWidth / imageAspect
+
+    if (targetHeight < usableHeight) {
+      targetHeight = usableHeight
+      targetWidth = targetHeight * imageAspect
+    }
   }
 
   if (targetWidth < stageNode.value.width()) {
     targetWidth = stageNode.value.width()
-    targetHeight = targetWidth / imageAspect - getMenubarHeight(stageNode.value.height())
+    targetHeight = targetWidth / imageAspect
   }
 
   image.position({ x: 0, y: getMenubarHeight(stageNode.value.height()) })
@@ -113,17 +119,25 @@ function dragBoundFunc(pos: Konva.Vector2d) {
   let y = 0
 
   if (stageNode.value.width() <= image.getWidth() * image.scaleX()) {
-    x = Math.max(pos.x > 0 ? 0 : pos.x, stageNode.value.width() - image.getWidth() * image.scaleX())
+    x = Math.max(pos.x > 0
+      ? 0
+      : pos.x, stageNode.value.width() - image.getWidth() * image.scaleX())
   }
   else {
-    x = Math.min(pos.x < 0 ? 0 : pos.x, stageNode.value.width() - image.getWidth() * image.scaleX())
+    x = Math.min(pos.x < 0
+      ? 0
+      : pos.x, stageNode.value.width() - image.getWidth() * image.scaleX())
   }
 
   if (stageNode.value.height() <= image.getHeight() * image.scaleY()) {
-    y = Math.max(pos.y > getMenubarHeight(stageNode.value.height()) ? getMenubarHeight(stageNode.value.height()) : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
+    y = Math.max(pos.y > getMenubarHeight(stageNode.value.height())
+      ? getMenubarHeight(stageNode.value.height())
+      : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
   }
   else {
-    y = Math.min(pos.y < getMenubarHeight(stageNode.value.height()) ? getMenubarHeight(stageNode.value.height()) : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
+    y = Math.min(pos.y < getMenubarHeight(stageNode.value.height())
+      ? getMenubarHeight(stageNode.value.height())
+      : pos.y, stageNode.value.height() - image.getHeight() * image.scaleY())
   }
 
   return { x, y }
@@ -209,10 +223,8 @@ async function saveImage() {
   const pixelRatio = exportWidth / cropWidth
 
   const dataUrl = stageNode.value.toDataURL({
-    height: cropHeight,
     pixelRatio,
     quality: 1,
-    width: cropWidth,
   })
   downloadFile(dataUrl, `notch-rip-${Date.now()}.png`)
 }
@@ -238,8 +250,6 @@ onMounted(async () => {
 
     layer.batchDraw()
   })
-
-  setInitialImageSettings()
 })
 </script>
 
@@ -258,57 +268,62 @@ onMounted(async () => {
           @mouseenter="handleMouseEnter"
           @mouseleave="handleMouseLeave"
         />
-        <v-rect :config="notchRectConfig" />
-        <v-rect :config="menuBarConfig" />
 
         <!-- corners -->
 
         <!-- top left -->
-        <v-image
+        <v-shape
+          ref="cornerRef"
           :config="{
-            visible: Boolean(config.corners.value.tl),
-            height: cornerSize,
-            image: cornerImage ?? undefined,
+            visible: config.corners.value.tl,
             rotation: 90,
-            width: cornerSize,
+            sceneFunc: createCornerShape,
+            fill: config.cornersColor.value,
             x: cornerSize,
-            y: stageNode?.height() ? stageNode.height() * config.menubarHeightScale.value - 0.75 : 0,
+            y: stageNode?.height() ? stageNode.height() * config.menubarHeightScale.value : 0,
           }"
         />
         <!-- top right -->
-        <v-image
+        <v-shape
+          ref="cornerRef"
           :config="{
-            visible: Boolean(config.corners.value.tr),
-            height: cornerSize,
-            image: cornerImage ?? undefined,
+            visible: config.corners.value.tr,
             rotation: 180,
-            width: cornerSize,
+            sceneFunc: createCornerShape,
+            fill: config.cornersColor.value,
             x: stageNode?.width() ? stageNode.width() : 0,
-            y: stageNode?.height() ? stageNode.height() * config.menubarHeightScale.value + cornerSize - 0.75 : 0,
+            y: stageNode?.height() ? stageNode.height() * config.menubarHeightScale.value + cornerSize : 0,
           }"
         />
         <!-- bottom left -->
-        <v-image
+        <v-shape
+          ref="cornerRef"
           :config="{
-            visible: Boolean(config.corners.value.bl),
-            height: cornerSize,
-            image: cornerImage ?? undefined,
-            width: cornerSize,
+            visible: config.corners.value.bl,
+            sceneFunc: createCornerShape,
+            fill: config.cornersColor.value,
             y: stageNode?.height() ? stageNode.height() - cornerSize : 0,
+            height: cornerSize,
+            width: cornerSize,
           }"
         />
         <!-- bottom right -->
-        <v-image
+        <v-shape
+          ref="cornerRef"
           :config="{
-            visible: Boolean(config.corners.value.br),
+            visible: config.corners.value.br,
+            sceneFunc: createCornerShape,
+            fill: config.cornersColor.value,
             rotation: 270,
-            height: cornerSize,
-            image: cornerImage ?? undefined,
-            width: cornerSize,
-            x: stageNode?.width() ? stageNode.width() - cornerSize : 0,
             y: stageNode?.height() ? stageNode.height() : 0,
+            x: stageNode?.width() ? stageNode.width() - cornerSize : 0,
+            height: cornerSize,
+            width: cornerSize,
           }"
         />
+
+        <v-rect :config="notchRectConfig" />
+        <v-rect :config="menuBarConfig" />
       </v-layer>
     </v-stage>
   </div>

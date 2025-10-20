@@ -36,6 +36,10 @@ export default defineNuxtConfig({
     },
   },
 
+  imports: {
+    dirs: ['~/utils/*/*.{ts,js,mjs,mts}'],
+  },
+
   modules: [
     '@nuxt/eslint',
     '@nuxt/fonts',
