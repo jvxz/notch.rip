@@ -5,6 +5,11 @@ export const useImageInput = createSharedComposable(() => {
   const imageFilename = ref<string | null>(null)
 
   const { execute, isLoading } = useAsyncState(async (image: File | string | null) => {
+    // prevent re-running the same image
+    if (image instanceof File && image.name === imageFilename.value) {
+      return
+    }
+
     if (image instanceof File) {
       imageUrl.value = URL.createObjectURL(image)
       imageFilename.value = image.name

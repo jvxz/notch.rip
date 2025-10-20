@@ -8,6 +8,16 @@ const { onChange: onFileChange, open: openFileDialog, reset: resetFileDialog } =
   multiple: false,
 })
 
+onPaste((data) => {
+  if (data instanceof File && data.type.startsWith('image/')) {
+    setImage(data)
+  }
+  else if (typeof data === 'string' && isUrl(data)) {
+    imageUrlInput.value = data
+    handleImageUrl()
+  }
+})
+
 onFileChange((files) => {
   if (files && files[0]) {
     setImage(files[0])
