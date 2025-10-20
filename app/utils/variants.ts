@@ -77,3 +77,34 @@ export const alertVariants = cva(
   },
 )
 export type AlertVariants = VariantProps<typeof alertVariants>
+
+export const toggleVariants = cva(
+  cn(
+    [interactiveStyles.base, 'grid place-items-center'],
+  ),
+  {
+    defaultVariants: {
+      size: 'default',
+      variant: 'default',
+    },
+    variants: {
+      size: {
+        default: [interactiveStyles.size.default, 'text-sm'],
+        icon: [interactiveStyles.size.icon, 'text-sm'],
+        lg: [interactiveStyles.size.lg, 'text-sm'],
+        sm: [interactiveStyles.size.sm, 'text-sm'],
+      },
+      variant: {
+        default: [
+          interactiveStyles.variant.ghost,
+          'm-0 border border-transparent data-[state=on]:bg-muted data-[state=on]:text-foreground',
+        ],
+        outline: [
+          interactiveStyles.variant.outline,
+          'm-0 data-[state=on]:border-primary/30 data-[state=on]:bg-muted',
+        ],
+      },
+    },
+  },
+)
+export type ToggleVariants = VariantProps<typeof toggleVariants>
