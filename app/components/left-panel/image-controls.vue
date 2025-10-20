@@ -3,7 +3,7 @@ const { clearImage, imageFilename, imageUrl, isLoadingImage, setImage } = useIma
 const dropZoneRef = useTemplateRef<HTMLDivElement>('dropZoneRef')
 const imageUrlInput = ref('')
 
-const { onChange: onFileChange, open: openFileDialog } = useFileDialog({
+const { onChange: onFileChange, open: openFileDialog, reset: resetFileDialog } = useFileDialog({
   accept: 'image/png, image/jpeg',
   multiple: false,
 })
@@ -68,7 +68,10 @@ async function handleImageUrl() {
       <UButton
         :disabled="!imageUrl || isLoadingImage"
         variant="danger"
-        @click="clearImage"
+        @click="() => {
+          clearImage()
+          resetFileDialog()
+        }"
       >
         Clear image
       </UButton>
