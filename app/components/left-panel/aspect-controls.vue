@@ -9,18 +9,20 @@ function getScreenAspect() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="flex items-center justify-between gap-2">
-      <p class="text-lg">
+    <LeftPanelHeading>
+      <template #title>
         Aspect ratio
-      </p>
-      <UButton
-        size="sm"
-        variant="soft"
-        @click="getScreenAspect"
-      >
-        Get screen aspect
-      </UButton>
-    </div>
+      </template>
+      <template #action>
+        <UButton
+          size="sm"
+          variant="soft"
+          @click="getScreenAspect"
+        >
+          Get screen aspect
+        </UButton>
+      </template>
+    </LeftPanelHeading>
     <div class="flex items-center gap-2">
       <UNumberFieldRoot v-model:model-value="config.aspect.value.width" class="flex-1">
         <UNumberFieldContent>

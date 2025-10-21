@@ -4,11 +4,11 @@ const config = useConfigValues()
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="flex items-center justify-between gap-2">
-      <p class="text-lg">
+    <LeftPanelHeading>
+      <template #title>
         Menubar height
-      </p>
-    </div>
+      </template>
+    </LeftPanelHeading>
     <div class="flex items-center gap-2">
       <USlider
         :min="0"

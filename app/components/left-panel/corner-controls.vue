@@ -21,18 +21,20 @@ function toggleAllCorners() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="flex items-center justify-between">
-      <p class="text-lg">
+    <LeftPanelHeading>
+      <template #title>
         Corners
-      </p>
-      <UButton
-        size="sm"
-        variant="soft"
-        @click="toggleAllCorners"
-      >
-        Toggle
-      </UButton>
-    </div>
+      </template>
+      <template #action>
+        <UButton
+          size="sm"
+          variant="soft"
+          @click="toggleAllCorners"
+        >
+          Toggle
+        </UButton>
+      </template>
+    </LeftPanelHeading>
     <div class="relative mx-auto grid h-32 w-full max-w-56 place-items-center overflow-hidden rounded border">
       <Icon name="tabler:photo" class="!size-7 text-border" />
       <button

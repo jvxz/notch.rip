@@ -39,9 +39,11 @@ function setColor(color: string, type: 'menubar' | 'corners') {
 
 <template>
   <div class="flex flex-col gap-2">
-    <p class="text-lg">
-      Color
-    </p>
+    <LeftPanelHeading>
+      <template #title>
+        Color
+      </template>
+    </LeftPanelHeading>
     <div class="flex items-center gap-2">
       <div class="flex flex-1 flex-col gap-1">
         <p class="text-sm">

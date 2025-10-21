@@ -18,8 +18,8 @@
 
     <CenterPanel />
 
-    <div class="flex-1">
+    <!-- <div class="flex-1">
       <RightPanel />
-    </div>
+    </div> -->
   </div>
 </template>

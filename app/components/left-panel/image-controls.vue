@@ -56,7 +56,7 @@ async function handleImageUrl() {
     >
       <Icon name="tabler:photo" class="!size-8" />
       <p class="w-lg truncate">
-        {{ imageFilename ?? "Drag or click to import" }}
+        {{ imageFilename ?? "Drag, click, or paste to import" }}
       </p>
     </button>
     <div class="flex items-center gap-2">
