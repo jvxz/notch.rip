@@ -1,0 +1,111 @@
+---
+globs: *.ts,*.vue,nuxt.config.ts
+---
+
+# Nuxt.js Specific Patterns
+
+## Nuxt 4 Configuration
+
+This project uses **Nuxt 4** with specific configuration patterns from [nuxt.config.ts](mdc:nuxt.config.ts).
+
+## Auto-imports
+
+Nuxt provides auto-imports for:
+- Vue Composition API (`ref`, `computed`, `watch`, `nextTick`)
+- Nuxt utilities (`useCookie`, `useWindowSize`, `useTemplateRef`)
+- VueUse composables (`reactiveOmit`, `toRefs`)
+
+## Composables
+
+### Shared Composables
+Use `createSharedComposable` for global state management:
+
+```typescript
+export const useConfig = createSharedComposable(() => {
+  // Shared state logic
+  return { config, currentPreset, applyPreset }
+})
+```
+
+### Cookie-based State
+Use `useCookie` for persistent state:
+
+```typescript
+const config = useCookie('config:key', {
+  default: () => defaultValue,
+  // Cookie options
+})
+```
+
+## Client-side Components
+
+Use `.client.vue` suffix for components requiring browser APIs:
+
+```vue
+<!-- canvas.client.vue -->
+<script setup lang="ts">
+// Browser-only code (Konva, canvas APIs)
+</script>
+```
+
+## Server-side API
+
+API routes in `server/api/` follow Nuxt conventions:
+
+```typescript
+// server/api/endpoint.post.ts
+export default defineEventHandler(async (event) => {
+  // Server-side logic
+})
+```
+
+## Module Integration
+
+Key modules used:
+- `@nuxt/eslint` - ESLint integration
+- `@nuxt/fonts` - Font optimization
+- `@nuxt/icon` - Icon management
+- `@nuxt/image` - Image optimization
+- `@nuxtjs/color-mode` - Dark/light mode
+- `@nuxtjs/seo` - SEO optimization
+- `reka-ui/nuxt` - UI component library
+- `nuxt-security` - Security headers
+- `nuxt-vitalizer` - Performance monitoring
+
+## Import Patterns
+
+### Utils Auto-imports
+Utils are auto-imported from `~/utils/*/*.{ts,js,mjs,mts}`:
+
+```typescript
+// These are auto-imported:
+import { cn } from '~/utils/cn' // ✅ Available globally
+import { buttonVariants } from '~/utils/variants' // ✅ Available globally
+```
+
+### Server Utils
+Server utilities are auto-imported in Nitro:
+
+```typescript
+// server/utils/ are auto-imported in server context
+```
+
+## Environment and Build
+
+- Uses **Bun** as package manager
+- **Vite** with Tailwind CSS plugin
+- **Rolldown** for faster builds (via pnpm override)
+- Development server runs on port 3000
+
+## Security Configuration
+
+Security headers configured for:
+- Content Security Policy (CSP)
+- Image sources allowlist
+- Rate limiting (disabled in development)
+
+## SEO and Meta
+
+- Site name from package.json
+- Title template: `%siteName`
+- Background color via CSS custom properties

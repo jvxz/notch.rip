@@ -1,0 +1,151 @@
+---
+globs: *.vue,*.ts
+description: Canvas manipulation and Konva.js patterns
+---
+
+# Canvas and Konva.js Patterns
+
+## Canvas Architecture
+
+This project uses **Konva.js** for canvas manipulation and image processing. The main canvas component is [canvas.client.vue](mdc:app/components/canvas.client.vue).
+
+## Konva Integration
+
+### Stage Setup
+```typescript
+import Konva from 'konva'
+
+const stageRef = useTemplateRef<Konva.Stage>('stageRef')
+const stageNode = computed<Konva.Stage | undefined>(() => stageRef.value?.getNode())
+```
+
+### Image Loading
+Use `Konva.Image.fromURL` for loading images:
+
+```typescript
+watch(imageUrl, async () => {
+  if (imageUrl.value) {
+    await new Promise((resolve) => {
+      Konva.Image.fromURL(imageUrl.value!, (image: Konva.Image) => {
+        selectedImage.value = image.image() as HTMLImageElement ?? null
+        resolve(true)
+      })
+    })
+  }
+})
+```
+
+## Canvas Configuration
+
+### Dynamic Configurations
+Use computed properties for reactive canvas configurations:
+
+```typescript
+const notchRectConfig = computed<Konva.RectConfig>(() => ({
+  cornerRadius: [0, 0, 9, 9],
+  fill: 'black',
+  height: getNotchHeight(canvasSize.value.height),
+  visible: Boolean(config.notch.value),
+  width: 125,
+  x: (canvasSize.value.width) / 2 - 62.5,
+}))
+```
+
+### Aspect Ratio Calculations
+```typescript
+const canvasAspect = computed(() => config.aspect.value.width / config.aspect.value.height)
+```
+
+## Canvas Operations
+
+### Image Manipulation
+- Use `useImageInput()` composable for image handling
+- Implement proper image loading with error handling
+- Use `setInitialSettings()` for default configurations
+
+### Download Functionality
+```typescript
+const { onCanvasDownloadTrigger } = useCanvas()
+onCanvasDownloadTrigger(saveImage)
+```
+
+## Canvas Composables
+
+### useCanvas()
+Provides canvas-specific functionality:
+- Canvas size calculations
+- Download triggers
+- Canvas operations
+
+### useImageInput()
+Handles image input and processing:
+- Image URL management
+- Image loading states
+- Image validation
+
+## Canvas Components
+
+### Client-side Only
+Canvas components must be `.client.vue` files since they require browser APIs:
+
+```vue
+<!-- canvas.client.vue -->
+<script lang="ts" setup>
+// Browser-only Konva code
+</script>
+```
+
+### Template Refs
+Use `useTemplateRef` for Konva objects:
+
+```vue
+<template>
+  <Stage ref="stageRef">
+    <Layer>
+      <Image ref="imageRef" />
+    </Layer>
+  </Stage>
+</template>
+```
+
+## Canvas Utilities
+
+### Corner Shape Creation
+Use [create-corner-shape.ts](mdc:app/utils/canvas/create-corner-shape.ts) for corner manipulations.
+
+### Size Calculations
+- `getNotchHeight()` - Calculate notch height based on stage height
+- `menubarHeight` - Calculate menubar height using scale factor
+- `canvasSize` - Get current canvas dimensions
+
+## Performance Considerations
+
+### Reactive Updates
+- Use computed properties for dynamic configurations
+- Minimize direct DOM manipulation
+- Use `nextTick()` for DOM updates after state changes
+
+### Memory Management
+- Properly dispose of Konva objects when components unmount
+- Use `watch` with cleanup for reactive updates
+- Avoid memory leaks in image loading
+
+## Canvas State Management
+
+### Configuration Integration
+Canvas components integrate with the global config system:
+
+```typescript
+const { canvasAspect, config } = useConfig()
+const { width: windowWidth } = useWindowSize()
+```
+
+### Preset Application
+Canvas updates automatically when presets are applied:
+
+```typescript
+async function applyPreset(preset: PresetKey) {
+  // Update config values
+  await nextTick() // Wait for DOM updates
+}
+```

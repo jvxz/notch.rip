@@ -1,0 +1,126 @@
+---
+alwaysApply: true
+---
+
+# Development Workflow and Best Practices
+
+## Package Management
+
+- **Package Manager**: Bun (configured in [package.json](mdc:package.json))
+- **Lock File**: `bun.lock` (not `package-lock.json` or `yarn.lock`)
+- **Installation**: Use `bun install` instead of `npm install`
+
+## Development Commands
+
+```bash
+# Development server (DO NOT RUN - user manages this)
+bun run dev
+
+# Build for production
+bun run build
+
+# Generate static site
+bun run generate
+
+# Preview production build
+bun run preview
+```
+
+## Code Quality
+
+### ESLint Configuration
+- Uses `@antfu/eslint-config` for consistent code style
+- Configured in [eslint.config.mjs](mdc:eslint.config.mjs)
+- Includes Vue, TypeScript, and formatting rules
+
+### Code Formatting
+- Automatic formatting via ESLint
+- Consistent import ordering
+- Semicolon usage (following Antfu's config)
+
+## File Organization
+
+### Component Structure
+```
+app/components/
+├── u/                    # Reusable UI components
+├── center-panel/         # Layout panels
+├── left-panel/
+├── right-panel/
+└── canvas.client.vue     # Main canvas (client-only)
+```
+
+### Utility Organization
+```
+app/utils/
+├── cn.ts                 # Class name utility
+├── styles.ts             # Design system
+├── variants.ts           # Component variants
+└── canvas/               # Canvas-specific utilities
+```
+
+## Git Workflow
+
+### Branch Strategy
+- `main` branch for production-ready code
+- Feature branches for new development
+- Use conventional commits for clear history
+
+### File Changes
+- Track changes in `app/components/u/slider.vue` (currently modified)
+- Commit related changes together
+- Use descriptive commit messages
+
+## Development Environment
+
+### IDE Configuration
+- TypeScript support enabled
+- Vue language server configured
+- ESLint integration active
+- Auto-formatting on save
+
+### Browser Testing
+- Test in Chrome/Safari for canvas functionality
+- Verify responsive design at different screen sizes
+- Test dark/light mode switching
+- Validate image upload and processing
+
+## Performance Considerations
+
+### Build Optimization
+- Uses Rolldown for faster builds (via pnpm override)
+- Tailwind CSS v4 for optimized styles
+- Image optimization via `@nuxt/image`
+- Font optimization via `@nuxt/fonts`
+
+### Runtime Performance
+- Client-side components for browser APIs
+- Reactive computed properties for canvas updates
+- Proper memory management for Konva objects
+- Efficient state management with composables
+
+## Security Practices
+
+### Content Security Policy
+- Configured in [nuxt.config.ts](mdc:nuxt.config.ts)
+- Image sources allowlist
+- Rate limiting in production
+
+### Input Validation
+- Use Zod for server-side validation
+- Validate image uploads
+- Sanitize user inputs
+
+## Testing Strategy
+
+### Manual Testing
+- Test canvas functionality with different images
+- Verify preset configurations
+- Test download functionality
+- Validate responsive behavior
+
+### Code Quality Checks
+- ESLint passes without errors
+- TypeScript compilation succeeds
+- No console errors in browser
+- Proper error handling for edge cases

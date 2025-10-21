@@ -1,0 +1,91 @@
+---
+globs: *.vue,*.css,*.ts
+---
+
+# Styling and Design System
+
+## Tailwind CSS Configuration
+
+This project uses **Tailwind CSS v4** with custom design system patterns.
+
+## Class Name Utility
+
+Always use the `cn()` utility from [cn.ts](mdc:app/utils/cn.ts) for conditional classes:
+
+```typescript
+import { cn } from '~/utils/cn'
+
+// In templates
+:class="cn('base-classes', conditionalClasses, props.class)"
+```
+
+## Design System Styles
+
+The project uses a structured design system defined in [styles.ts](mdc:app/utils/styles.ts):
+
+### Interactive Styles
+- `interactiveStyles.base` - Base interactive element styles
+- `interactiveStyles.size` - Size variants (sm, default, lg, icon)
+- `interactiveStyles.variant` - Visual variants (default, ghost, outline, soft, danger, link)
+
+### Static Styles
+- `staticStyles.base` - Base static element styles
+- `staticStyles.variant` - Static variants (default, danger)
+
+### Usage Pattern
+```vue
+<template>
+  <button :class="cn(
+    interactiveStyles.base,
+    interactiveStyles.size.default,
+    interactiveStyles.variant.default,
+    'additional-classes'
+  )">
+    Button
+  </button>
+</template>
+```
+
+## Component Variants
+
+Use `class-variance-authority` (CVA) for component variants as shown in [variants.ts](mdc:app/utils/variants.ts):
+
+```typescript
+export const buttonVariants = cva(
+  `${interactiveStyles.base} relative inline-flex items-center justify-center`,
+  {
+    variants: {
+      size: { sm: '...', default: '...', lg: '...' },
+      variant: { default: '...', ghost: '...', outline: '...' }
+    }
+  }
+)
+```
+
+## Color Mode
+
+The project supports dark/light mode via `@nuxtjs/color-mode`:
+- Use semantic color tokens (primary, secondary, muted, etc.)
+- Avoid hardcoded colors in favor of CSS custom properties
+- Test components in both light and dark modes
+
+## CSS Custom Properties
+
+Use CSS custom properties for theming:
+- `--color-background` - Background color
+- `--color-foreground` - Text color
+- `--color-primary` - Primary brand color
+- `--color-muted` - Muted/secondary colors
+
+## Responsive Design
+
+- Use Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`)
+- Mobile-first approach
+- Test canvas components at different screen sizes
+
+## Animation and Transitions
+
+- Use Tailwind's transition utilities
+- Prefer `duration-100` for quick interactions
+- Use `animate-in` and `animate-out` for enter/exit animations
+- Follow the patterns in `popoverStyles` for consistent animations

@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+---
+
+# Project Structure and Architecture
+
+This is a Nuxt 4 application for creating notch-style screenshots with canvas manipulation.
+
+## Core Architecture
+
+- **Framework**: Nuxt 4 with Vue 3 Composition API
+- **Styling**: Tailwind CSS v4 with custom design system
+- **Canvas**: Konva.js for canvas manipulation and image processing
+- **UI Components**: Reka UI component library with custom variants
+- **State Management**: Vue composables with cookie persistence
+
+## Key Directories
+
+- `app/components/` - Vue components organized by feature
+  - `u/` - Reusable UI components (button, slider, dialog, etc.)
+  - `center-panel/`, `left-panel/`, `right-panel/` - Layout panels
+  - `canvas.client.vue` - Main canvas component (client-side only)
+- `app/composables/` - Vue composables for shared logic
+  - [use-config.ts](mdc:app/composables/use-config.ts) - Configuration management
+  - [use-canvas.ts](mdc:app/composables/use-canvas.ts) - Canvas operations
+  - [use-image-input.ts](mdc:app/composables/use-image-input.ts) - Image handling
+- `app/utils/` - Utility functions
+  - [cn.ts](mdc:app/utils/cn.ts) - Class name utility (clsx + tailwind-merge)
+  - [styles.ts](mdc:app/utils/styles.ts) - Design system styles
+  - [variants.ts](mdc:app/utils/variants.ts) - Component variants
+- `server/api/` - Server-side API routes
+- `shared/utils/` - Shared utilities between client and server
+
+## Configuration
+
+- [nuxt.config.ts](mdc:nuxt.config.ts) - Main Nuxt configuration
+- [package.json](mdc:package.json) - Dependencies and scripts
+- Uses Bun as package manager with Vite preset
+
+## Key Features
+
+- Canvas-based image editing with notch simulation
+- Preset configurations (MacBook, Desktop)
+- Real-time preview with Konva.js
+- Cookie-based state persistence
+- Responsive design with Tailwind CSS

@@ -1,0 +1,73 @@
+---
+globs: *.vue
+---
+
+# Vue Component Patterns
+
+## Component Structure
+
+Always use `<script setup lang="ts">` for Vue components. Follow this structure:
+
+```vue
+<script setup lang="ts">
+// 1. Imports
+import type { ComponentProps } from 'reka-ui'
+import { useForwardPropsEmits } from 'reka-ui'
+
+// 2. Props and emits definitions
+const props = defineProps<ComponentProps & { class?: HTMLAttributes['class'] }>()
+const emits = defineEmits<ComponentEmits>()
+
+// 3. Reactive state and computed properties
+const delegatedProps = reactiveOmit(props, 'class')
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
+</script>
+
+<template>
+  <!-- Component template -->
+</template>
+```
+
+## UI Component Patterns
+
+For UI components in `app/components/u/`:
+
+1. **Props Forwarding**: Use `useForwardPropsEmits` from Reka UI for proper prop delegation
+2. **Class Handling**: Always accept a `class` prop and use `cn()` utility for class merging
+3. **Reactive Omit**: Use `reactiveOmit` to exclude non-forwarded props
+4. **Template Refs**: Use `useTemplateRef` for DOM element references
+
+Example from [slider.vue](mdc:app/components/u/slider.vue):
+```vue
+const props = defineProps<SliderRootProps & { class?: HTMLAttributes['class'] }>()
+const delegatedProps = reactiveOmit(props, 'class')
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
+```
+
+## Canvas Components
+
+For canvas-related components:
+
+1. **Client-side Only**: Use `.client.vue` suffix for components that require browser APIs
+2. **Konva Integration**: Import Konva types and use `useTemplateRef` for stage references
+3. **Reactive Config**: Use computed properties for dynamic canvas configurations
+
+Example from [canvas.client.vue](mdc:app/components/canvas.client.vue):
+```vue
+const stageRef = useTemplateRef<Konva.Stage>('stageRef')
+const stageNode = computed<Konva.Stage | undefined>(() => stageRef.value?.getNode())
+```
+
+## Composables Usage
+
+- Use `useConfig()` for configuration state management
+- Use `useCanvas()` for canvas operations
+- Use `useImageInput()` for image handling
+- Always destructure reactive values from composables
+
+## Template Patterns
+
+- Use `v-bind="forwarded"` for prop forwarding
+- Use `cn()` utility for conditional classes
+- Use `v-for` with proper keys for dynamic lists
+- Use `useTemplateRef` for component references
