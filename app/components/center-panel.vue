@@ -1,5 +1,5 @@
 <template>
-  <UCard class="relative flex h-full w-3/4 shrink-0 items-center justify-center overflow-hidden">
+  <UCard class="relative flex h-full w-full items-center justify-center overflow-hidden">
     <Transition name="zoom">
       <Canvas />
     </Transition>
