@@ -86,7 +86,9 @@ export default defineNuxtConfig({
   },
 
   site: {
+    description: 'Simple tool to generate wallpapers that reserve the space of the menu bar on macOS. Perfect for hiding the notch on your MacBook, or changing the color of your menu bar.',
     name: pkgName,
+    url: 'https://notch.rip',
   },
 
   vite: {
