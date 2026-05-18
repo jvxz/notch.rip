@@ -92,5 +92,15 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        'class-variance-authority',
+        'clsx',
+        'konva',
+        'tailwind-merge',
+        'vue-konva',
+        'zod',
+      ]
+    }
   },
 })
