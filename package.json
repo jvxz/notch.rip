@@ -41,7 +41,7 @@
     "@types/node": "^24.12.4",
     "eslint": "^9.39.4",
     "eslint-plugin-better-tailwindcss": "^3.8.0",
-    "eslint-plugin-format": "^1.5.0"
+    "eslint-plugin-format": "^2.0.1"
   },
   "pnpm": {
     "overrides": {
