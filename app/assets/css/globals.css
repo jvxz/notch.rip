@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:where(.dark-mode, .dark-mode *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --font-sans: 'Funnel Sans', sans-serif;
@@ -110,7 +110,7 @@
   --ring: hsl(246.8919 74% 60.7843%);
 }
 
-.dark-mode {
+.dark {
   --background: hsl(0 0% 1.9608%);
   --foreground: hsl(0 0% 98.0392%);
   --card: hsl(0 0% 3.1373%);

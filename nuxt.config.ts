@@ -68,6 +68,10 @@ export default defineNuxtConfig({
     },
   },
 
+  ogImage: {
+    enabled: false,
+  },
+
   security: {
     headers: {
       contentSecurityPolicy: {
@@ -84,10 +88,6 @@ export default defineNuxtConfig({
     rateLimiter: process.env.NODE_ENV === 'production' ? undefined : false,
   },
 
-  ogImage: {
-    enabled: false,
-  },
-
   site: {
     description: 'Simple tool to generate wallpapers that reserve the space of the menu bar on macOS. Perfect for hiding the notch on your MacBook, or changing the color of your menu bar.',
     name: pkgName,
@@ -95,7 +95,6 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()],
     optimizeDeps: {
       include: [
         'class-variance-authority',
@@ -104,7 +103,8 @@ export default defineNuxtConfig({
         'tailwind-merge',
         'vue-konva',
         'zod',
-      ]
-    }
+      ],
+    },
+    plugins: [tailwindcss()],
   },
 })
