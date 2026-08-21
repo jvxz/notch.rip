@@ -6,3 +6,5 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   vue-demi: true
+minimumReleaseAgeExclude:
+  - '@rollup/rollup-openbsd-x64@4.62.5'
