@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS build
+FROM oven/bun:1@sha256:ec06c3b6cea04192ae6770c434f668ca41d343ad19fa6472216c7b48be39c598 AS build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY . ./
 
 RUN bun run build
 
-FROM oven/bun:1
+FROM oven/bun:1@sha256:ec06c3b6cea04192ae6770c434f668ca41d343ad19fa6472216c7b48be39c598
 
 WORKDIR /app
 
